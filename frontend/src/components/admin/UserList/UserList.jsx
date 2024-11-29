@@ -1,23 +1,26 @@
-import React, { useState, useEffect } from 'react';
-import { FaPencilAlt, FaTrashAlt } from 'react-icons/fa';
-import Loader from '../../user/Loader';
-import Swal from 'sweetalert2'
-import { toast } from 'react-toastify';
+import React, { useState, useEffect } from "react";
+import { FaPencilAlt, FaTrashAlt } from "react-icons/fa";
+import Loader from "../../user/Loader";
+import Swal from "sweetalert2";
+import { toast } from "react-toastify";
 
-import { useGetUsersMutation , useDeleteUserMutation } from '../../../slices/admin/adminApiSlice';
-import './UserList.css';
+import {
+  useGetUsersMutation,
+  useDeleteUserMutation,
+} from "../../../slices/admin/adminApiSlice";
+import "./UserList.css";
 
-import AddUser from '../AddUser';
-import EditUser from '../EditUser';
+import AddUser from "../AddUser";
+import EditUser from "../EditUser";
 
 const UserList = () => {
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState("");
   const [userCount, setUserCount] = useState(users?.length || 0);
   const [showAddUser, setShowAddUser] = useState(false);
-  const [showEditUser , setShowEditUser] = useState(false)
-  const [selectedEditUser , setSelectedEditUser] = useState(null)
+  const [showEditUser, setShowEditUser] = useState(false);
+  const [selectedEditUser, setSelectedEditUser] = useState(null);
 
   const [getUsers, { isLoading }] = useGetUsersMutation();
   const [deleteUser, { isDeleting }] = useDeleteUserMutation();
@@ -26,14 +29,14 @@ const UserList = () => {
     async function fetchData() {
       try {
         const usersData = await getUsers();
-        console.log("usersData.data",usersData.data)
+        console.log("usersData.data", usersData.data);
         setUsers(usersData.data);
       } catch (error) {
         // Handle error
       }
     }
     fetchData();
-  }, [userCount , showAddUser,selectedEditUser,showEditUser,setUsers]);
+  }, [userCount, showAddUser, selectedEditUser, showEditUser, setUsers]);
 
   useEffect(() => {
     let searchedUsers = filterUser(search, users);
@@ -41,12 +44,13 @@ const UserList = () => {
   }, [search, users]);
 
   const filterUser = (text, usersList) => {
-    if (text === '') {
+    if (text === "") {
       return usersList;
     } else {
-      const filtered = usersList.filter((user) =>
-        user.name.toLowerCase().includes(text.toLowerCase()) ||
-        user.email.toLowerCase().includes(text.toLowerCase())
+      const filtered = usersList.filter(
+        (user) =>
+          user.name.toLowerCase().includes(text.toLowerCase()) ||
+          user.email.toLowerCase().includes(text.toLowerCase())
       );
       return filtered;
     }
@@ -60,8 +64,8 @@ const UserList = () => {
     setShowAddUser(false);
   };
 
-  function handleEditUserClick(user){
-    setSelectedEditUser(user)
+  function handleEditUserClick(user) {
+    setSelectedEditUser(user);
     setShowEditUser(true);
   }
 
@@ -83,16 +87,15 @@ const UserList = () => {
       if (result.isConfirmed) {
         try {
           const res = await deleteUser({ userId: userId });
-        
-           if (res) {
+
+          if (res) {
             setUserCount((prev) => prev - 1);
             toast.success("User deleted successfully");
-    
-              const storedUser = JSON.parse(localStorage.getItem("userInfo"));
-              if (storedUser && storedUser._id === userId) {
-                localStorage.removeItem("userInfo");
-              }
-            
+
+            const storedUser = JSON.parse(localStorage.getItem("userInfo"));
+            if (storedUser && storedUser._id === userId) {
+              localStorage.removeItem("userInfo");
+            }
           }
         } catch (error) {
           toast.error(error?.data?.message || error.message);
@@ -125,7 +128,12 @@ const UserList = () => {
             </div>
           </div>
           {showAddUser && <AddUser onClose={handleCloseAddUser} />}
-          {showEditUser && <EditUser userData={selectedEditUser} onClose={handleCloseEditUser}/>}
+          {showEditUser && (
+            <EditUser
+              userData={selectedEditUser}
+              onClose={handleCloseEditUser}
+            />
+          )}
           <div className="user-dashboard-info-box table-responsive mb-0 bg-dark p-4 shadow-sm">
             {isLoading || isDeleting ? (
               <div className="loader-container">
@@ -139,7 +147,8 @@ const UserList = () => {
                     <th className="action text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody>{console.log("filteredUsers:",filteredUsers)}
+                <tbody>
+                  {console.log("filteredUsers:", filteredUsers)}
                   {/* {filteredUsers.map((user, index) => (
                     <tr className="candidates-list" key={index}>
                       <td className="title">
@@ -164,41 +173,59 @@ const UserList = () => {
                         <button className="btn btn-sm btn-danger" title="Delete" onClick={() => handleDeletuser(user._id)}><FaTrashAlt /></button>
                       </td>
                     </tr>
-                  ))} */}{filteredUsers && filteredUsers.length > 0 ? (
-  filteredUsers.map((user, index) => (
-    <tr className="candidates-list" key={index}>
-      <td className="title">
-        <div className="thumb">
-          <img className="img-fluid" src={user.profileImage} alt="" />
-        </div>
-        <div className="candidate-list-details">
-          <div className="candidate-list-info">
-            <div className="candidate-list-title">
-              <h5 className="mb-0">{user.name}</h5>
-            </div>
-            <div className="candidate-list-option">
-              <ul className="list-unstyled">
-                <li><i className="fas fa-filter pr-1"></i>{user.email}</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </td>
-      <td>
-        <button className="btn btn-sm btn-info action-btn" title="Edit" onClick={() => handleEditUserClick(user)}><FaPencilAlt /></button>
-        <button className="btn btn-sm btn-danger" title="Delete" onClick={() => handleDeletuser(user._id)}><FaTrashAlt /></button>
-      </td>
-    </tr>
-  ))
-) : (
-  <tr>
-    <td colSpan="2" className="text-center">
-      <p>No users found.</p>
-    </td>
-  </tr>
-)}
-
-
+                  ))} */}
+                  {filteredUsers && filteredUsers.length > 0 ? (
+                    filteredUsers.map((user, index) => (
+                      <tr className="candidates-list" key={index}>
+                        <td className="title">
+                          <div className="thumb">
+                            <img
+                              className="img-fluid"
+                              src={user.profileImage}
+                              alt=""
+                            />
+                          </div>
+                          <div className="candidate-list-details">
+                            <div className="candidate-list-info">
+                              <div className="candidate-list-title">
+                                <h5 className="mb-0">{user.name}</h5>
+                              </div>
+                              <div className="candidate-list-option">
+                                <ul className="list-unstyled">
+                                  <li>
+                                    <i className="fas fa-filter pr-1"></i>
+                                    {user.email}
+                                  </li>
+                                </ul>
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                        <td>
+                          <button
+                            className="btn btn-sm btn-info action-btn"
+                            title="Edit"
+                            onClick={() => handleEditUserClick(user)}
+                          >
+                            <FaPencilAlt />
+                          </button>
+                          <button
+                            className="btn btn-sm btn-danger"
+                            title="Delete"
+                            onClick={() => handleDeletuser(user._id)}
+                          >
+                            <FaTrashAlt />
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="2" className="text-center">
+                        <p>No users found.</p>
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             )}
